@@ -1,5 +1,7 @@
 # 8x8 FIFO Memory Design using Verilog HDL
 
+## Block Diafram
+![dia](blockfifo.png)
 ## Overview
 
 This project implements an **8x8 FIFO (First-In First-Out) Memory** using **Verilog HDL**.
@@ -168,9 +170,6 @@ Input Data
 ![Waveform](fifo.png)
 
 ---
-
-##schematic diagram
-![diagram](fifod.png)
 
 ## Applications of FIFO
 
