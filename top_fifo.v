@@ -10,16 +10,17 @@ wire wr_en, rd_en;
 wire full, empty;
 wire [7:0] data_out_fifo;
 
+// Producer module
 mod_a mod1(
     .data_in(data_top),
     .clk(clk),
     .rst(rst),
+    .full(full),
     .data_out(data_out_temp),
-    .wr_en(wr_en),
-    .full(full)
-    
+    .wr_en(wr_en)
 );
 
+// FIFO
 fifo_8_8 fifo(
     .clk(clk),
     .rst(rst),
@@ -31,10 +32,11 @@ fifo_8_8 fifo(
     .empty(empty)
 );
 
+// Consumer module
 mod_b mod2(
     .clk(clk),
     .rst(rst),
-    .empty(empty),        // CONNECT THIS
+    .empty(empty),
     .data_in(data_out_fifo),
     .data_out(data_out_top),
     .rd_en(rd_en)

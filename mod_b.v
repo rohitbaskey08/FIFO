@@ -7,47 +7,25 @@ module mod_b(
  output reg rd_en
 );
 
-parameter idle = 2'b00;
-parameter s1 = 2'b01;
-parameter data_state = 2'b10;
-
-reg [1:0] ps, ns;
-
 always @(posedge clk)
 begin
     if(rst)
-        ps <= idle;
+    begin
+        data_out <= 8'b0;
+        rd_en <= 1'b0;
+    end
     else
-        ps <= ns;
-end
-
-always @(*)
-begin
-    ns = ps;
-    rd_en = 0;
-
-    case(ps)
-
-        idle: ns = s1;
-
-        s1: ns = data_state;
-
-        data_state:
+    begin
+        if(!empty)
         begin
-            ns = idle;
-            if(!empty)
-                rd_en = 1;
+            rd_en <= 1'b1;
+            data_out <= data_in;
         end
-
-    endcase
-end
-
-always @(posedge clk)
-begin
-    if(rst)
-        data_out <= 0;
-    else if(rd_en)
-        data_out <= data_in;
+        else
+        begin
+            rd_en <= 1'b0;
+        end
+    end
 end
 
 endmodule

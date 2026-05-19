@@ -9,15 +9,16 @@ module mod_a(
 
 always @(posedge clk)
 begin
-    if(rst ^ full)
+    if(rst || full)
     begin
-        data_out <= 0;
-        wr_en <= 0;
+        data_out <= 8'b0;
+        wr_en <= 1'b0;
     end
     else
     begin
         data_out <= data_in;
-        wr_en <= 1;
+        wr_en <= 1'b1;
     end
 end
+
 endmodule
