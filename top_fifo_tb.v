@@ -16,6 +16,7 @@ top_fifo uut (
     .data_out_top(data_out_top)
 );
 
+
 // Clock Generation (10ns period)
 always #5 clk = ~clk;
 
