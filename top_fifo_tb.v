@@ -7,67 +7,99 @@ reg rst;
 reg [7:0] data_top;
 
 wire [7:0] data_out_top;
+wire wr_en;
+wire rd_en;
+wire full;
+wire empty;
 
 // DUT Instantiation
 top_fifo uut (
     .clk(clk),
     .rst(rst),
     .data_top(data_top),
-    .data_out_top(data_out_top)
+    .data_out_top(data_out_top),
+    .wr_en(wr_en),
+    .rd_en(rd_en),
+    .full(full),
+    .empty(empty)
 );
 
+// ==================================
+// COVERAGE
+// ==================================
+covergroup fifo_cg @(posedge clk);
+    option.per_instance =1;
 
-// Clock Generation (10ns period)
+    wr_cp : coverpoint wr_en {
+        bins wr_on  = {1};
+        bins wr_off = {0};
+    }
+
+    rd_cp : coverpoint rd_en {
+        bins rd_on  = {1};
+        bins rd_off = {0};
+    }
+
+    full_cp : coverpoint full {
+        bins fifo_full     = {1};
+        bins fifo_not_full = {0};
+    }
+
+    empty_cp : coverpoint empty {
+        bins fifo_empty     = {1};
+        bins fifo_not_empty = {0};
+    }
+
+    // Corner case
+    wr_rd_cross : cross wr_en, rd_en;
+    option.auto_bin_max =256;
+
+endgroup
+
+fifo_cg cg = new();
+
+// Clock Generation
 always #5 clk = ~clk;
 
-initial
-begin
-    // Initialize signals
+// ==================================
+// TESTCASE
+// ==================================
+initial begin
+
     clk = 0;
     rst = 1;
-    data_top = 8'b00000000;
+    data_top = 8'h00;
 
-    // Apply reset
-    #20;
-    rst = 0;
+    // Reset
+    #20 rst = 0;
 
-    // ==========================
-    // Write Data 1
-    // ==========================
-    #10;
-    data_top = 8'h11;   // Expected output: 11
-
-    // ==========================
-    // Write Data 2
-    // ==========================
-    #10;
-    data_top = 8'h22;   // Expected output: 22
-
-    // ==========================
-    // Write Data 3
-    // ==========================
-    #10;
-    data_top = 8'h33;   // Expected output: 33
-
-    // ==========================
-    // Write Data 4
-    // ==========================
-    #10;
-    data_top = 8'h44;   // Expected output: 44
-
-    // Wait for FIFO reads
+    // Write data
+    #10 data_top = 8'h11;
+    #10 data_top = 8'h22;
+    #10 data_top = 8'h33;
+    #10 data_top = 8'h44;
     #100;
 
-    // Stop simulation
+    $display("Coverage = %0.2f%%",
+              cg.get_inst_coverage());
+
     $finish;
 end
 
-// Monitor Values in Console
-initial
-begin
+// ==================================
+// MONITOR
+// ==================================
+initial begin
     $monitor(
-        "Time=%0t | rst=%b | data_in=%h | data_out=%h",
-        $time, rst, data_top, data_out_top
+    "T=%0t rst=%b wr=%b rd=%b full=%b empty=%b data_in=%h data_out=%h",
+    $time,
+    rst,
+    wr_en,
+    rd_en,
+    full,
+    empty,
+    data_top,
+    data_out_top
     );
 end
 
